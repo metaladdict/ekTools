@@ -4,6 +4,7 @@ Plugin Wordpress archi+minimaliste, pour ajouter quelques fonctionnalités dont 
 
 ## :gift: Config actuelle
 * ajout d'éléments dans le header du site (typiquement, ajout du code analytics)
+* ajout de liens permettant de dupliquer des pages et posts
 
 
 
