@@ -7,5 +7,6 @@ Plugin Wordpress archi+minimaliste, pour ajouter quelques fonctionnalités dont 
 * ajout de liens permettant de dupliquer des pages et posts
 
 
-
+## :gift: A suivre
+* Ajout de config des header http
 
