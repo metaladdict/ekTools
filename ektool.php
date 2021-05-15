@@ -3,12 +3,13 @@
 * Plugin Name: [EK] EK ToOls
 * Plugin URI: http://www.wdev.pro/
 * Description: Ajoute juste ce qu'il me faut !
-* Version: 1.1
+* Version: 1.2
 * Author: Erwan Kuznik
 * Author URI: http://www.wdev.pro/
 * 
 *	1.0  : 29/04/2021 - ajout d'éléments dans le header
 *	1.1  : 04/05/2021 - copie des pages et posts
+*	1.2  : 16/05/2021 - ajout de l'icone The Beautifull Walk pour le menu social dans le thème GridLove
 * 
 **/
 
@@ -17,9 +18,8 @@
  ****								SETTINGS								****
  ****																				****
  ***********************************************/
-$ektools_v = "1";
+$ektools_v = "1.2";
 
-/*
 // ajout de CSS et JS en front... à utiliser ultérieurement
 function ektools_enqueue_scripts() 
 {
@@ -27,10 +27,10 @@ function ektools_enqueue_scripts()
 	wp_register_style('ektools_css',  plugin_dir_url( __FILE__ ) . '/ektools.css', array(), $ektools_v );
 	wp_enqueue_style('ektools_css');
 
-	wp_enqueue_script('ektools_js', plugin_dir_url( __FILE__ ).'/ektools.js', array('jquery'), $ektools_v, true );
-	wp_add_inline_script('ektools_js', "ektools_init();");
+	//wp_enqueue_script('ektools_js', plugin_dir_url( __FILE__ ).'/ektools.js', array('jquery'), $ektools_v, true );
+	//wp_add_inline_script('ektools_js', "ektools_init();");
 }
-*/
+
 
 function ektools_enqueue_admin() 
 {
@@ -212,7 +212,7 @@ function ektools_add_header()
 
 add_action('init', 'ektools_init', '9');
 add_action('admin_menu', 'ektools_menu');
-//add_action('wp_enqueue_scripts', 'ektools_enqueue_scripts');
+add_action('wp_enqueue_scripts', 'ektools_enqueue_scripts');
 add_action('admin_enqueue_scripts', 'ektools_enqueue_admin');
 add_action('wp_head', 'ektools_add_header');
 
