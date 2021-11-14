@@ -1,0 +1,9 @@
+.isdash {
+  font-family: 'dashicons';
+  color: #000;
+  text-decoration: none;
+  font-size: 20px;
+}
+tr.isdone {
+  background-color: #b1f1b9;
+}

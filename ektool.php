@@ -10,6 +10,7 @@
 *	1.0  : 29/04/2021 - ajout d'éléments dans le header
 *	1.1  : 04/05/2021 - copie des pages et posts
 *	1.2  : 16/05/2021 - ajout de l'icone The Beautifull Walk pour le menu social dans le thème GridLove
+*	1.3  : 14/11/2021 - Regéneration des miniatures
 * 
 **/
 
@@ -18,7 +19,8 @@
  ****								SETTINGS								****
  ****																				****
  ***********************************************/
-$ektools_v = "1.2";
+$ektools_v = "1.3";
+$cleprivee = "maCléPrivée";
 
 // ajout de CSS et JS en front... à utiliser ultérieurement
 function ektools_enqueue_scripts() 
@@ -43,6 +45,7 @@ function ektools_enqueue_admin()
 function ektools_menu() 
 {
 	add_menu_page('[EK] Tools', 'EK Tools', 'administrator', 'ektools-conf', 'ektools_settings_page', 'dashicons-admin-tools');	
+	add_submenu_page('ektools-conf', 'Miniatures', 'Miniatures', 'administrator', 'ektools-miniatures', 'ektools_miniatures' );
 	// 1.1
 	add_filter('post_row_actions', 'ektools_replicate_link', 10, 2);
 	add_filter('page_row_actions', 'ektools_replicate_link', 10, 2);
@@ -71,6 +74,10 @@ function ektools_init()
 ****									AJAX									****
 ****																				****
 ***********************************************/
+if(is_admin()) 
+{
+	add_action('wp_ajax_ektregenpix', 'ektools_ajax_regenpix');
+}
 
 
 
@@ -79,6 +86,87 @@ function ektools_init()
 ****									BACK									****
 ****																				****
 ***********************************************/
+function ektools_miniatures() 
+{
+	global $cleprivee;
+
+	$args = [
+    'post_type'      => 'attachment',
+    'post_mime_type' => 'image',
+    'post_status'    => 'inherit',
+    'posts_per_page' => -1,
+	];
+
+	$lstimg = new WP_Query($args);
+
+	echo '<h1>Visuels</h1>';
+	echo '<a href="#" onclick="voirvisu(); return false;">Voir les visuels</a> | ';
+	echo '<a href="#" onclick="regneall(); return false;">Tout regénérer</a>';
+	echo '<table id="lstpixz">';
+	foreach($lstimg->posts as $v)
+	{
+		echo '<tr data-pixid="'.$v->ID.'">';
+		echo '	<td data-src="'.$v->guid.'"><img height="40" style="width: auto; display: none;"></td>';
+		echo '	<td>'.$v->post_title.'</td>';
+		echo '	<td><a href="#" onclick="regenpix('.$v->ID.'); return false;" class="isdash dashicons-image-rotate"></a></td>';
+		echo '</tr>';
+	}
+	
+	echo '</table>';
+	$ajax_nonce = wp_create_nonce($cleprivee);
+	?>
+	<script>
+	function voirvisu() 
+	{
+		var $ = jQuery;
+		$('td[data-src]').each(function() {
+			$(this).find('img').attr('src', $(this).attr('data-src')).css('display', 'block');
+		});
+	}
+	function regneall()
+	{
+		var $ = jQuery;
+		$('#lstpixz').toggleClass('reginall');
+		if($('#lstpixz').hasClass('reginall'))
+		{regenNext();}
+	}
+	function regenNext()
+	{
+		var $ = jQuery;
+		pid = $('#lstpixz').find('tr:not(.isdone)').attr('data-pixid');
+		regenpix(pid);
+	}
+	function regenpix(id) 
+	{
+		var $ = jQuery;
+		var dt = {
+			'security'	:	"<?php echo $ajax_nonce;?>",
+			'action'		:	'ektregenpix',
+			'pixid'			:	id
+		};
+		$.post(ajaxurl, dt, retRegen, "JSON");
+	};
+
+	function retRegen(e)
+	{
+		var $ = jQuery;
+		if(e.res==true)
+		{
+			$('tr[data-pixid='+e.pid+']').addClass('isdone');
+			if($('#lstpixz').hasClass('reginall'))
+			{regenNext();}
+		}
+		else
+		{
+			console.log('erreur !');
+		}
+		
+	}
+	</script>
+	<?php
+	//echo '<pre>'.print_r($lstimg->posts, true).'</pre>';
+}
+
 function ektools_settings_page() 
 {
 	?>
@@ -111,6 +199,27 @@ function ektools_replicate_link($actions, $post)
 ****									UTILS									****
 ****																				****
 ***********************************************/
+function ektools_ajax_regenpix()
+{
+	global $cleprivee;
+
+	check_ajax_referer($cleprivee, 'security');
+	$pid = intval($_POST['pixid']);
+	if($pid>0)
+	{
+		$atch = get_post($pid);
+		$fl = wp_get_original_image_path($pid);
+		wp_create_image_subsizes($fl, $pid);
+		$r = ['res'=>true, 'pid'=>$pid];
+	}
+	else
+	{
+		$r = ['res'=>false];
+	}
+
+	wp_die(json_encode($r));
+}
+
 function ektools_repliquer_post()
 {
   // honteusement pompé de https://rudrastyh.com/wordpress/duplicate-post.html
